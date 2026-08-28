@@ -1,0 +1,47 @@
+GRAPHONE STARTUP FIX
+====================
+
+What was fixed:
+1. JS-rendered directories now use Playwright when requires_js=True.
+2. Y Combinator uses /companies/<slug> links instead of the old generic <a> selector.
+3. Crunchbase public discovery was removed from the default startup source list because it returns HTTP 403 to automated clients.
+4. Startup pagination is scaled from the requested target.
+5. Added a regression test for YC company-link extraction.
+
+IMPORTANT:
+- Keep your existing .env and graphone_raw.db.
+- Do not copy this archive's database over your current database if you have newer data.
+- Install Playwright's Chromium browser if not already installed.
+
+Commands in VS Code PowerShell:
+
+1) Activate environment
+.\.venv\Scripts\Activate.ps1
+
+2) Install dependencies
+pip install -r requirements.txt
+
+3) Ensure Chromium exists
+playwright install chromium
+
+4) Test the fixed parser
+python -m pytest -q tests/test_directory_scraper.py
+
+5) Test the full existing suite
+python -m pytest -q
+
+6) Run 10 startup records
+python scripts/run_pipeline.py --vertical startups --target 10
+
+7) If that works, scale the demo
+python scripts/run_pipeline.py --vertical startups --target 100
+
+8) Later, run the assignment-scale target
+python scripts/run_pipeline.py --vertical startups --target 1000
+
+Expected startup-side improvement:
+- You should no longer see Crunchbase HTTP 403 in the default startup run.
+- You should no longer see "no_cards_found_check_selectors" for YC if Playwright can load the directory.
+- You may still see a bot challenge if YC blocks the browser session. The code detects that condition and fails safely rather than fabricating data.
+
+Do NOT disable provenance or generate fake startup data. Every structured record must retain a real source URL.

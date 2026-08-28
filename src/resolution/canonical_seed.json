@@ -1,0 +1,29 @@
+{
+  "startups": [
+    "OpenAI", "Anthropic", "Google DeepMind", "Mistral AI", "Cohere",
+    "Stability AI", "Hugging Face", "Inflection AI", "Adept AI",
+    "Character.AI", "Perplexity AI", "Runway", "ElevenLabs", "Scale AI",
+    "Databricks", "Together AI", "Fireworks AI", "Groq", "Cerebras Systems",
+    "SambaNova Systems", "Weights & Biases", "LangChain", "Pinecone",
+    "Weaviate", "Replicate", "Modal Labs", "Baseten", "Anyscale",
+    "MosaicML", "AI21 Labs", "Aleph Alpha", "Synthesia", "Jasper",
+    "Writer", "Glean", "Sierra", "Harvey AI", "Cursor (Anysphere)",
+    "Codeium", "Tabnine", "Poolside", "Magic AI", "Imbue",
+    "Reka AI", "01.AI", "Moonshot AI", "Zhipu AI", "DeepSeek",
+    "xAI", "Suno"
+  ],
+  "aliases": {
+    "OpenAI": ["Open AI", "OpenAI, Inc.", "OpenAI Inc", "OpenAI LP"],
+    "Anthropic": ["Anthropic PBC", "Anthropic, Inc."],
+    "Google DeepMind": ["DeepMind", "Google Deep Mind", "DeepMind Technologies"],
+    "Hugging Face": ["HuggingFace", "Hugging Face Inc"],
+    "Character.AI": ["Character AI", "CharacterAI", "Character.ai"],
+    "Cerebras Systems": ["Cerebras"],
+    "SambaNova Systems": ["SambaNova"],
+    "Weights & Biases": ["Weights and Biases", "WandB", "W&B"],
+    "Cursor (Anysphere)": ["Cursor", "Anysphere"],
+    "xAI": ["X.AI", "X AI"],
+    "01.AI": ["01 AI", "Zero One AI", "Yi (01.AI)"],
+    "AI21 Labs": ["AI21", "AI21Labs"]
+  }
+}

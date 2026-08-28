@@ -1,0 +1,5 @@
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium   # only needed for JS-heavy / anti-bot sources
+cp .env.example .env          # fill in API keys
+python scripts/run_pipeline.py --vertical papers --target 10 or 100 or 1000
