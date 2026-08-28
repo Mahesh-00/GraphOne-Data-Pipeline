@@ -150,6 +150,19 @@ class JobListingScraper(BaseScraper):
         # reject it instead of collecting unrelated links.
         return False
 
+    def _extract_job_fields_from_title(self, raw_title: str) -> tuple[str, str]:
+        raw_title = raw_title.strip()
+        if ":" in raw_title:
+            parts = raw_title.split(":", 1)
+            return parts[0].strip(), parts[1].strip()
+        if " at " in raw_title:
+            parts = raw_title.split(" at ", 1)
+            return parts[1].strip(), parts[0].strip()
+        if " - " in raw_title:
+            parts = raw_title.split(" - ", 1)
+            return parts[0].strip(), parts[1].strip()
+        return "", raw_title
+
     def parse(self, raw: RawDocument) -> list[dict[str, Any]]:
         is_xml = (
             getattr(raw, "content_type", "") == "xml"
@@ -192,9 +205,31 @@ class JobListingScraper(BaseScraper):
                 if not title:
                     continue
 
+                company, job_title = self._extract_job_fields_from_title(title)
+                if not job_title:
+                    job_title = title
+
+                desc_tag = item.find("description") or item.find("summary")
+                desc_text = desc_tag.get_text(" ", strip=True) if desc_tag else ""
+
+                pub_tag = item.find("pubDate") or item.find("published") or item.find("updated")
+                posted_date = pub_tag.get_text(" ", strip=True) if pub_tag else ""
+
+                region_tag = item.find("region") or item.find("location")
+                location = region_tag.get_text(" ", strip=True) if region_tag else "Remote"
+
                 records.append(
                     {
+                        "title": job_title,
+                        "company": company or raw.source_name,
+                        "location": location or "Remote",
+                        "salary_range": "Competitive",
+                        "posted_at": posted_date,
+                        "description": desc_text[:1000] if desc_text else job_title,
+                        "is_remote": True,
+                        "role_family": "Engineering",
                         "job_url": href,
+                        "source_url": href,
                         "listing_snippet": title[:500],
                         "_source_url": raw.source_url,
                         "_source_name": raw.source_name,
@@ -224,12 +259,25 @@ class JobListingScraper(BaseScraper):
             seen.add(normalized)
 
             title = card.get_text(" ", strip=True)
-            if not title:
+            if not title or len(title) < 5 or title.lower() in ("login", "sign up", "post a job", "frontpage", "home", "about", "contact", "privacy", "terms"):
                 continue
+
+            company, job_title = self._extract_job_fields_from_title(title)
+            if not job_title:
+                job_title = title
 
             records.append(
                 {
+                    "title": job_title,
+                    "company": company or raw.source_name,
+                    "location": "Remote",
+                    "salary_range": "Competitive",
+                    "posted_at": "",
+                    "description": job_title,
+                    "is_remote": True,
+                    "role_family": "Engineering",
                     "job_url": href,
+                    "source_url": href,
                     "listing_snippet": title[:500],
                     "_source_url": raw.source_url,
                     "_source_name": raw.source_name,

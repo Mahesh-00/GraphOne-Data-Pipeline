@@ -1,10 +1,10 @@
-# GraphOne AI Data Pipeline & Intelligence Platform
+# GraphOne AI Intelligence Platform & Data Pipeline
 
-A production-ready, fault-tolerant, async AI data pipeline and portfolio dashboard tracking research papers, startups, products, jobs, and news across the artificial intelligence and venture ecosystem.
+A production-ready, fault-tolerant, async AI data pipeline and portfolio dashboard tracking **Research Papers**, **Startups**, **Products**, **AI Jobs**, and **News Signals** across the global venture and artificial intelligence ecosystem.
 
 ---
 
-## 1. System Architecture
+## 📋 System Architecture
 
 ```text
                                   DATA SOURCES
@@ -20,7 +20,7 @@ A production-ready, fault-tolerant, async AI data pipeline and portfolio dashboa
                            (Async aiohttp / Playwright)
                                        │
                                        ▼
-                               Pipeline / Ingestion
+                              Pipeline / Ingestion
                         (LLM Extraction / Normalization)
                                        │
                                        ▼
@@ -51,126 +51,201 @@ A production-ready, fault-tolerant, async AI data pipeline and portfolio dashboa
 
 ---
 
-## 2. Key Features
+## 🚀 Quickstart: Setup & Installation
 
-* **5 AI Verticals**:
-  * **Papers**: arXiv Atom API with author extraction and automated GitHub star enrichment.
-  * **Startups**: YCombinator & Techstars directory harvesters with entity normalization.
-  * **Products**: Product Hunt API/crawlers and AI directory extraction with clean name filtering.
-  * **Jobs**: Remote job scrapers for WeWorkRemotely, RemoteOK, AIJobsNet, and LinkedIn.
-  * **News**: Full-text articles from TechCrunch, VentureBeat, and tech publications.
-* **Fault-Tolerant Scraping**: Isolated per-source failure handling, SSL resilience, exponential backoff retries, and rate limiting.
-* **Deduplication Engine**: Canonical arXiv IDs, normalized URL hashing, and fuzzy entity resolution (`rapidfuzz`).
-* **Persistent Multi-Tier Database**: Zero-infra SQLite for local dev, automatic async PostgreSQL compatibility for production.
-* **Google Sheets Integration**: Automatic spreadsheet creation, tab initialization, and incremental row updates.
-* **Production REST API**: FastAPI backend delivering `/api/health`, `/api/stats`, and paginated vertical endpoints.
-* **Modern Next.js Dashboard**: Dark/light mode UI with real-time KPI metrics, search filtering, and admin trigger modal.
-* **Automated Scheduling**: GitHub Actions 6-hour cron workflow (`.github/workflows/scheduled_pipeline.yml`) and background worker script (`scripts/schedule_worker.py`).
+### Prerequisites
+* **Python 3.10+**
+* **Node.js 18+** & **npm**
+* **Git**
 
 ---
 
-## 3. Quickstart & Local Execution
+### Step 1: Clone the Repository & Setup Virtual Environment
 
-### Step 3.1: Install Dependencies
+Open PowerShell or your terminal in the project root:
 
 ```powershell
-# Create virtual environment
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+# 1. Navigate to the project root directory
+cd graphone-pipeline-startup-fix
 
-# Install Python dependencies
+# 2. Create Python virtual environment
+python -m venv .venv
+
+# 3. Activate the virtual environment
+# On Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+# On macOS/Linux:
+# source .venv/bin/activate
+
+# 4. Install Python dependencies
 pip install -r requirements.txt
 playwright install chromium
+
+# 5. Install Frontend dependencies (in the web folder)
+cd web
+npm install
+cd ..
 ```
 
-### Step 3.2: Configure Environment
+---
 
-Copy `.env.example` to `.env`:
+### Step 2: Configure Environment Variables
+
+Copy `.env.example` to create your local `.env` file:
 
 ```powershell
 cp .env.example .env
 ```
 
-### Step 3.3: Run Tests
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest -v
-```
-
-### Step 3.4: Execute Pipeline
-
-```powershell
-# Ingest single vertical (e.g. jobs)
-python scripts/run_pipeline.py --vertical jobs --target 10
-
-# Ingest and export to Google Sheets
-python scripts/run_pipeline.py --vertical jobs --target 10 --export-sheets
-
-# Ingest all verticals
-python scripts/run_pipeline.py --vertical all --target 10
+Add your API keys to `.env` (Groq, Gemini, DeepSeek, GitHub, Google Sheets):
+```env
+GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
+DEEPSEEK_API_KEY=your_deepseek_api_key
+GITHUB_API_TOKEN=your_github_token
+DATABASE_URL=sqlite+aiosqlite:///./graphone_raw.db
 ```
 
 ---
 
-## 4. Production API Endpoints
+### Step 3: Run Automated Tests
 
-FastAPI backend runs on `http://127.0.0.1:8000`:
+Verify that all 41 test suites pass:
 
 ```powershell
-uvicorn api.index:app --reload --port 8000
+# Run from project root with .venv activated:
+python -m pytest tests/ -v
 ```
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/health` | Health monitoring & database connectivity check |
-| `GET` | `/api/stats` | Exact database record counts across all verticals |
-| `GET` | `/api/jobs` | Paginated job records (`?limit=50&offset=0&search=ai`) |
-| `GET` | `/api/papers` | Paginated research papers with arXiv IDs and GitHub stars |
-| `GET` | `/api/startups` | Paginated startup records with canonical company names |
-| `GET` | `/api/products` | Paginated AI products with clean name normalization |
-| `GET` | `/api/news` | Paginated AI news articles |
-| `POST` | `/api/pipeline/run` | Protected admin trigger (`Authorization: Bearer <secret>`) |
 
 ---
 
-## 5. Next.js Dashboard
+## 🖥️ How to Start the Servers
 
-Run the Next.js frontend locally:
+You can run both the **FastAPI Backend** and the **Next.js Frontend Dashboard** side-by-side:
+
+### Option A: Start the Next.js Frontend Dashboard (UI)
+
+Open your terminal:
 
 ```powershell
+# 1. Navigate to the web folder
 cd web
-npm install
+
+# 2. Start Next.js development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the live dashboard.
+* **Live Dashboard UI**: [http://localhost:3000](http://localhost:3000)
+* **Built-in API Docs Page**: [http://localhost:3000/docs](http://localhost:3000/docs)
+* **Live Health Check**: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
-To test production build:
+---
+
+### Option B: Start the FastAPI Backend Server (API)
+
+Open a **separate terminal window**:
 
 ```powershell
-npm run build
+# 1. From the project root with .venv activated:
+cd graphone-pipeline-startup-fix
+.\.venv\Scripts\Activate.ps1
+
+# 2. Start the FastAPI server
+uvicorn api.index:app --reload --port 8000
+```
+
+* **Backend Status**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+* **Swagger Interactive Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+* **Health Endpoint**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+
+---
+
+## ⚡ How to Run the Ingestion Pipeline
+
+To scrape new data from AI sources and synchronize the Google Sheets tabs:
+
+```powershell
+# Run from project root with .venv activated:
+
+# 1. Run ALL 5 Verticals + Export to Google Sheets:
+python scripts/run_pipeline.py --vertical all --target 10 --export-sheets
+
+# 2. Run a specific vertical:
+python scripts/run_pipeline.py --vertical papers --target 10 --export-sheets
+python scripts/run_pipeline.py --vertical startups --target 10 --export-sheets
+python scripts/run_pipeline.py --vertical products --target 10 --export-sheets
+python scripts/run_pipeline.py --vertical jobs --target 10 --export-sheets
+python scripts/run_pipeline.py --vertical news --target 10 --export-sheets
 ```
 
 ---
 
-## 6. Scheduled Pipeline Automation
+## 📊 Database Inspection & Verification
 
-### GitHub Actions (Recommended)
-
-Workflow file: `.github/workflows/scheduled_pipeline.yml`
-
-Runs automatically every 6 hours on GitHub Actions and supports manual dispatch runs with custom targets.
-
-### Background Worker Script
-
-To run on a VM / Docker container / background server:
+Check the exact record counts in your local SQLite database:
 
 ```powershell
-python scripts/schedule_worker.py --interval-hours 6 --vertical all --target 25 --export-sheets
+python check_db.py
 ```
 
 ---
 
-## 7. Deployment Documentation
+## ☁️ Deployment Guide (Vercel & GitHub Actions)
 
-For complete production deployment instructions to Vercel and PostgreSQL, see [DEPLOYMENT.md](file:///c:/Users/TECH-GENIUSES/OneDrive/Desktop/project/graphone-pipeline-startup-fix/DEPLOYMENT.md).
+### 1. Deploy to Vercel (Web Dashboard & Serverless API)
+1. Push your repository to GitHub (`git add .`, `git commit -m "Deploy"`, `git push origin main`).
+2. Log into [Vercel](https://vercel.com) &rarr; **Add New Project** &rarr; Select your repo.
+3. Keep **Root Directory** as `./` (Vercel automatically uses [`vercel.json`](./vercel.json)).
+4. Click **Deploy**.
+
+### 2. Scheduled Continuous Crawling (GitHub Actions)
+* The repository includes `.github/workflows/scheduled_pipeline.yml`.
+* Runs automatically **every 6 hours** on GitHub Actions with full Playwright Chromium support, syncing fresh data directly to Google Sheets.
+
+---
+
+## 📁 Repository Structure
+
+```text
+graphone-pipeline-startup-fix/
+│
+├── src/                          # Core Python Engine
+│   ├── config.py                 # Central configurations & sources
+│   ├── scrapers/                 # Async crawlers (arXiv, YC, PH, WWR, TechCrunch)
+│   ├── llm/                      # Multi-tier LLM orchestrator & chunker
+│   ├── resolution/               # Deterministic entity resolver (4-stage matching)
+│   ├── storage/                  # SQLite/PostgreSQL storage & sheets exporter
+│   ├── pipeline/                 # Ingestion & 24h freshness filter
+│   └── utils/                    # Logging & async pool
+│
+├── api/                          # FastAPI Backend
+│   ├── index.py                  # Serverless API endpoints
+│   └── requirements.txt          # API dependencies
+│
+├── web/                          # Next.js 14 Frontend Dashboard
+│   ├── app/                      # Next.js App Router (page.tsx, layout.tsx, docs/)
+│   ├── package.json              # Node dependencies
+│   └── next.config.js            # Next.js configuration & API proxying
+│
+├── scripts/                      # Execution Runners
+│   ├── run_pipeline.py           # CLI ingestion runner
+│   └── schedule_worker.py        # Background interval worker
+│
+├── tests/                        # Pytest Test Suite (41 tests)
+├── canonical_seed.json           # 50+ Canonical AI Entity Seeds
+├── vercel.json                   # Vercel multi-route deployment config
+├── ARCHITECTURE.md               # Technical architecture document
+├── DEPLOYMENT.md                 # Deployment & scaling guide
+├── requirements.txt              # Python requirements
+└── README.md                     # Project documentation
+```
+
+---
+
+## 🛠️ Common Troubleshooting
+
+| Issue | Cause | Fix |
+| :--- | :--- | :--- |
+| `ModuleNotFoundError: No module named 'api'` | Running `uvicorn` from `.venv\Scripts` instead of root. | Run `cd ..\..` to return to the project root before running `uvicorn`. |
+| `can't open file 'scripts/run_pipeline.py'` | Terminal is inside `web\` subfolder. | Run `cd ..` to return to project root. |
+| `Playwright browser not found` | Chromium binary not installed. | Run `playwright install chromium`. |

@@ -124,9 +124,49 @@ class GoogleSheetsExporter:
         return str(value)
 
     def _normalize_row(self, record: dict[str, Any]) -> dict[str, Any]:
+        flat: dict[str, Any] = {}
+        # If nested content exists, unpack it first
+        if "content" in record and isinstance(record["content"], dict):
+            for k, v in record["content"].items():
+                flat[k] = v
+        if "data" in record and isinstance(record["data"], dict):
+            for k, v in record["data"].items():
+                flat[k] = v
+
+        # Then copy top-level items
+        for k, v in record.items():
+            if k.startswith("_") or k in ("content", "data", "raw_document_id"):
+                continue
+            if k not in flat:
+                flat[k] = v
+
+        # Standardize aliases and synonyms across verticals
+        if "github_url" in flat and not flat.get("github_repo_url"):
+            flat["github_repo_url"] = flat["github_url"]
+        if "github_repo_url" in flat and not flat.get("github_url"):
+            flat["github_url"] = flat["github_repo_url"]
+
+        if "paper_url" in flat and not flat.get("source_url"):
+            flat["source_url"] = flat["paper_url"]
+
+        if "published_date" in flat and not flat.get("published_at"):
+            flat["published_at"] = flat["published_date"]
+        if "published_date" in flat and not flat.get("posted_at"):
+            flat["posted_at"] = flat["published_date"]
+
+        if "full_text" in flat and not flat.get("content_summary"):
+            flat["content_summary"] = str(flat["full_text"])[:500]
+
+        if isinstance(flat.get("authors"), (list, tuple, set)):
+            flat["authors"] = ", ".join(str(a) for a in flat["authors"])
+
+        if isinstance(flat.get("categories"), (list, tuple, set)):
+            flat["categories"] = ", ".join(str(c) for c in flat["categories"])
+
         normalized: dict[str, Any] = {}
-        for key, value in record.items():
-            if key.startswith("_"):
+        ignored_keys = {"content", "data", "raw_document_id", "recordType", "record_type", "listing_snippet", "job_url"}
+        for key, value in flat.items():
+            if key.startswith("_") or key in ignored_keys:
                 continue
             if isinstance(value, dict):
                 normalized[key] = json.dumps(value, default=str, sort_keys=True)
@@ -145,9 +185,10 @@ class GoogleSheetsExporter:
         base_order = preferred_headers.get(record_type or "", [])
         headers = [h for h in base_order]
         seen = set(headers)
+        ignored_keys = {"content", "data", "raw_document_id", "recordType", "record_type", "listing_snippet", "job_url"}
         for row in rows:
             for key in row.keys():
-                if key not in seen and not key.startswith("_"):
+                if key not in seen and not key.startswith("_") and key not in ignored_keys:
                     seen.add(key)
                     headers.append(key)
         return headers

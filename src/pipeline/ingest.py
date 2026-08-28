@@ -1774,6 +1774,12 @@ async def run_freshness_filtered_pipeline(
         if not source_url:
             continue
 
+        if record_type == "JOB":
+            if not item.get("title") and not item.get("company"):
+                continue
+            if any(p in source_url.lower() for p in ("/login", "/signup", "/sign-up", "/signin", "/sign-in", "/hire-remotely", "/about", "/contact")):
+                continue
+
         if await storage.source_url_exists(
             record_type,
             source_url,
